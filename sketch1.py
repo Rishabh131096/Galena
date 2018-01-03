@@ -12,6 +12,9 @@ temp = np.zeros((10,360))
 ind = 0
 
 
+center_x = 200
+center_y = 200
+
 shapes = ["Batman", "Bicycle", "Circle", "Hexagon", "Pentagon", "Square", "Triangle"]
 
 
@@ -23,9 +26,11 @@ def mag(x,y):
 	return ret
 
 
-#--------FUNCTION--------------------------
+#--------FUNCTION TO DECRYPT--------------------------
 def get_this(x,y,w,h):
 	global ind
+	global center_x
+	global center_y
 	center_x = w/2
 	center_y = h/2
 	
@@ -65,26 +70,24 @@ def train():
 		#cv2.waitKey(1000)
 	
 		w,h = img.shape
+		
+		gray = img
+		corners = cv2.goodFeaturesToTrack(gray,25,0.01,10)
+		corners = np.int0(corners)
+		
+		for i in corners:
+			x,y = i.ravel()
+			cv2.circle(img,(x,y),3,0,-1)
+		
+		cv2.imshow('dst',img)
+		cv2.waitKey(500)
+		
 		for x in range(0,w):
 			for y in range(0,h):
 				if img.item(x,y)==0:
 					r = get_this(x,y,w,h)
 					D[ind][r[0]] += 1
-					temp[ind][r[1]] += 1
-					
-		sum=0
-		num=0
-		for i in range(0,360):
-			if temp[ind][i]>0:
-				sum+=i
-				num+=1
-		avg = sum/num
-		print avg
-		for i in range(0,360):
-			index = i-avg
-			if(index<0):
-				index = 360+index
-			A[ind][index] = temp[ind][i]
+					A[ind][r[1]] += 1
 		ind +=1
 
 def predict():
@@ -103,25 +106,24 @@ def predict():
 		#cv2.waitKey(1000)
 	
 		w,h = img.shape
+		
+		gray = img
+		corners = cv2.goodFeaturesToTrack(gray,25,0.01,10)
+		corners = np.int0(corners)
+		
+		for i in corners:
+			x,y = i.ravel()
+			cv2.circle(img,(x,y),3,0,-1)
+		
+		cv2.imshow('dst',img)
+		cv2.waitKey(500)
+		
 		for x in range(0,w):
 			for y in range(0,h):
 				if img.item(x,y)==0:
 					r = get_this(x,y,w,h)
 					P[ind][r[0]] += 1
-					temp[ind][r[1]] += 1
-		sum=0
-		num=0
-		for i in range(0,360):
-			if temp[ind][i]>0:
-				sum+=i
-				num+=1
-		avg = sum/num
-		print avg
-		for i in range(0,360):
-			index = i-avg
-			if(index<0):
-				index = 360+index
-			B[ind][index] = temp[ind][i]
+					B[ind][r[1]] += 1
 		ind +=1
 		
 def calc_dist():
